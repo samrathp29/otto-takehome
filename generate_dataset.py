@@ -21,7 +21,7 @@ def generate_km_data(num_curves=2):
         curves.append({"t": t, "y": y})
     return curves, max_t
 
-def create_dataset(num_samples=50):
+def create_dataset(num_samples=500):
     os.makedirs("dataset/images", exist_ok=True)
     os.makedirs("dataset/ground_truth", exist_ok=True)
     
@@ -60,4 +60,4 @@ def create_dataset(num_samples=50):
     print(f"Generated {num_samples} KM plots.")
 
 if __name__ == "__main__":
-    create_dataset(50)
+    create_dataset(500)

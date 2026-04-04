@@ -61,7 +61,7 @@ PYTHONPATH=. pytest tests/
 
 ### Generate datasets
 ```bash
-python generate_dataset.py        # 50 standard synthetic plots
+python generate_dataset.py        # 500 standard synthetic plots
 python generate_adversarial.py    # 20 adversarial edge-case plots
 ```
 
