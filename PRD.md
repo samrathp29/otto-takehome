@@ -2,7 +2,7 @@
 
 ## 1. Executive Summary
 **Objective:** Programmatically digitize Kaplan-Meier (KM) survival plots from literature using an autonomous develop-evaluate-iterate loop powered by **Autoresearch**. 
-**Core Approach:** Instead of fully manual engineering, the development methodology leverages `LineFormer` (instance segmentation) wrapped inside guided `autoresearch` execution cycles to autonomously drive the metric (Curve Fidelity) towards $>95\%$.
+**Core Approach:** Instead of heavy deep learning models, the development methodology leverages **Classical Computer Vision** (HSV masking + morphological contours) wrapped inside guided `autoresearch` execution cycles to autonomously drive the metric (Curve Fidelity) towards $>95\%$.
 
 ## 2. Product Goals & Core Requirements
 The primary goal is to achieve SOTA accuracy in mapping KM visualizations to $(Time, Survival\_Probability)$ datasets.
@@ -14,7 +14,7 @@ The primary goal is to achieve SOTA accuracy in mapping KM visualizations to $(T
 ## 3. Evaluation Benchmark (The Autoresearch Target)
 To enable the autonomous `Modify -> Verify -> Keep/Discard` loop, we must have a reliable, mechanical evaluation function:
 * **Dataset:** 500 ground-truth KM charts (a mix of synthetic templates and heavily overlapping real clinical crops).
-* **Metric Script (`verify_accuracy.py`):** Calculates Euclidean coordinate mapping error compared to ground truth, isolating the Mean Absolute Error (MAE). 
+* **Metric Script (`evaluate.py`):** Calculates symmetric Hausdorff coordinate mapping error compared to ground truth, isolating the Mean Absolute Error (MAE) relative to common bounds. 
 * **Target Fidelity Score:** $>95\%$
 
 ---
@@ -31,16 +31,16 @@ Development is strictly broken down into discrete step-by-step tasks designed fo
 * **Verify:** `pytest tests/test_evaluation_metrics.py | grep "passed"`
 * **Action:** Direct build, no autonomous loop required.
 
-### Task 2: Base LineFormer Integration
-**Objective:** Hook into the LineFormer codebase and autonomously refine the bridging script until it successfully pulls bounding boxes/lines from all sample images without crashing.
-* **Goal:** Increase the number of images processed correctly by the LineFormer segmentation pipeline.
+### Task 2: Classical CV Curve Extraction
+**Objective:** Implement and autonomously refine a color-masked segmentation pipeline until it successfully pulls bounding boxes/lines from all sample images without crashing.
+* **Goal:** Increase the number of images processed correctly by the CV-based segmentation pipeline.
 * **Scope:** `src/segment_lines.py`, `src/app.py`
 * **Metric:** Number of successfully segmented images without Exception (higher is better).
 * **Verify:** `python evaluate.py --mode segmentation_count`
 * **Iterations:** `Iterations: 10`
 
 ### Task 3: Axis OCR & Calibration Loop
-**Objective:** Autonomously write and optimize OCR parsers that look for X/Y limits and legend text.
+**Objective:** Autonomously write and optimize OCR parsers that look for X/Y tick labels and map pixels to data coordinates.
 * **Goal:** Increase accuracy of axis bounding-box and text extraction.
 * **Scope:** `src/axis_extraction.py`, `requirements.txt`
 * **Metric:** Axis limit identification accuracy percentage (higher is better).
@@ -49,7 +49,7 @@ Development is strictly broken down into discrete step-by-step tasks designed fo
 * **Iterations:** `Iterations: 20`
 
 ### Task 4: Monotonic Function Conversion Layer
-**Objective:** Post-process raw LineFormer dots into mathematically correct survival steps.
+**Objective:** Post-process raw extracted contour dots into mathematically correct survival steps.
 * **Goal:** Reduce the Curve Fidelity Error (MAE) of extracted curves vs. ground-truth data.
 * **Scope:** `src/postprocess_steps.py`
 * **Metric:** Curve Fidelity MAE (lower is better).
