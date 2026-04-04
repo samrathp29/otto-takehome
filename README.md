@@ -1,28 +1,95 @@
 # Kaplan-Meier Digitization Pipeline
 
-An end-to-end autonomous computer vision pipeline to digitize and extract raw coordinate tracking from scientific Kaplan-Meier plots.
+An end-to-end computer vision pipeline to digitize Kaplan-Meier survival plots and extract raw `(Time, Survival_Probability)` coordinate data.
 
-## Overview
-This repository provides a fast, robust extraction algorithm. While solutions like `LineFormer` (which use Swin-T + Mask2Former models) are heavy, require deep CNNs, and are complex to set up without CUDA, this implementation opts for a **Classical Image Processing** approach using OpenCV. It aggressively thresholds morphological boundaries, maps coordinates via generated border constraints, and post-processes the extractions computationally using explicit Monotonicity domain rules ($P(t_1) \geq P(t_2)$).
+## Approach
+
+This pipeline uses **classical image processing** (OpenCV) rather than deep learning:
+
+1. **Line Segmentation** (`src/segment_lines.py`): HSV color-space masking isolates colored curves from the white/gray/black background, then contour detection extracts pixel-level curve boundaries.
+2. **Axis Detection & OCR** (`src/axis_extraction.py`): Dark-pixel thresholding finds the plot bounding box. Pytesseract OCR reads x-axis tick labels, then linear extrapolation calculates the true axis range (handles matplotlib's xlim extending past the last tick).
+3. **Coordinate Mapping** (`src/app.py`): Pixel contours are mapped to data-space coordinates using the detected axis bounds.
+4. **Monotonicity Enforcement** (`src/postprocess_steps.py`): Since KM curves are strictly non-increasing, any upward noise is clamped: `P(t₁) ≥ P(t₂)`.
+
+### Why not LineFormer?
+
+The take-home instructions reference [LineFormer](https://github.com/TheJaeLal/LineFormer) as a potential approach. We evaluated it but chose classical CV because:
+- LineFormer requires CUDA + legacy PyTorch 1.13 + mmcv-full — brittle to set up
+- Our synthetic KM plots use distinct colors, making HSV masking highly effective
+- Classical CV runs instantly on CPU/Apple Silicon with zero GPU overhead
+- The approach is fully deterministic and interpretable
 
 ## Installation
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Running the Pipeline
-
-To run the unified demo/inference script on a plot:
+**System dependency:** `tesseract` (for OCR)
 ```bash
-python run_inference.py dataset/images/plot_000.png --visualize
+brew install tesseract  # macOS
 ```
 
-To run the evaluation over the dataset:
+## Usage
+
+### Run inference on a single image
 ```bash
-python evaluate.py --dataset dataset --preds preds
+python run_inference.py dataset/images/plot_000.png
+python run_inference.py dataset/images/plot_000.png --visualize  # Save overlay
+```
+
+### Run full pipeline on dataset
+```bash
+python src/app.py
+```
+
+### Evaluate accuracy
+```bash
+python evaluate.py --mode full_fidelity                    # Default dataset
+python evaluate.py --mode full_fidelity --dataset adversarial  # Adversarial subset
+python evaluate.py --mode segmentation_count               # Count successful extractions
+python evaluate.py --mode axis_accuracy                    # Axis detection accuracy
+python evaluate.py --mode check_crashes                    # Crash check
+```
+
+### Run tests
+```bash
+PYTHONPATH=. pytest tests/
+```
+
+### Generate datasets
+```bash
+python generate_dataset.py        # 50 standard synthetic plots
+python generate_adversarial.py    # 20 adversarial edge-case plots
 ```
 
 ## Results
-- **Curve Fidelity:** 95.81% empirical accuracy against a 50-image heavily randomized synthetic dataset.
-- The dataset features multiple synthetic overlapping cohorts, non-standard track steps, and bounding box axis extractions.
+
+| Dataset | Curve Fidelity |
+|---------|---------------|
+| Standard (50 images) | **95.81%** |
+| Adversarial (20 images) | 64.28% |
+
+The adversarial dataset intentionally tests failure modes: grayscale palettes, low DPI (50), truncated y-axes, and tightly overlapping curves.
+
+## Project Structure
+
+```
+├── evaluate.py              # Evaluation harness (PRD-compatible CLI)
+├── run_inference.py          # Single-image demo with optional visualization
+├── generate_dataset.py       # Standard synthetic dataset generator
+├── generate_adversarial.py   # Adversarial dataset generator
+├── requirements.txt
+├── BENCHMARK.md              # Detailed benchmark methodology
+├── src/
+│   ├── app.py                # Main pipeline orchestrator
+│   ├── segment_lines.py      # CV-based line segmentation
+│   ├── axis_extraction.py    # Axis detection + OCR
+│   └── postprocess_steps.py  # Monotonicity enforcement
+├── dataset/                  # Standard synthetic dataset
+├── data/adversarial/         # Adversarial edge-case dataset
+└── tests/
+    └── test_evaluation_metrics.py
+```

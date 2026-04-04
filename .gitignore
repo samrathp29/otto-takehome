@@ -20,6 +20,7 @@ LineFormer/
 
 # Pipeline Artifacts (Outputs should be generated at runtime)
 preds/
+preds_adversarial/
 visualized_*.png
 
 # OS / IDE
