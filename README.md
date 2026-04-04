@@ -69,7 +69,7 @@ python generate_adversarial.py    # 20 adversarial edge-case plots
 
 | Dataset | Curve Fidelity |
 |---------|---------------|
-| Standard (50 images) | **95.81%** |
+| Standard (500 images) | **95.32%** |
 | Adversarial (20 images) | 64.28% |
 
 The adversarial dataset intentionally tests failure modes: grayscale palettes, low DPI (50), truncated y-axes, and tightly overlapping curves.

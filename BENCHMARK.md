@@ -2,7 +2,7 @@
 
 ## Dataset Composition
 
-### Standard Dataset (50 images)
+### Standard Dataset (500 images)
 Generated programmatically via `generate_dataset.py` using matplotlib:
 - **1–3 overlapping cohort curves** per plot
 - Randomized step intervals (1–10 units) and drop magnitudes (0.01–0.10)
@@ -48,7 +48,7 @@ The referenced preprint ([biorxiv.org/content/10.1101/2025.09.15.676421v1](https
 | Axis reading | LLM text extraction | Pytesseract OCR + linear extrapolation |
 | Post-processing | Manual rules | Automated monotonicity enforcement |
 | Hardware | GPU required (LLM inference) | CPU only |
-| Accuracy | ~95% (reported) | 95.81% (standard), 64.28% (adversarial) |
+| Accuracy | ~95% (reported) | 95.32% (standard), 64.28% (adversarial) |
 
 ### Honest Limitations
 Our classical CV approach struggles with:
