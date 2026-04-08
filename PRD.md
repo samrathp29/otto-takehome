@@ -2,17 +2,17 @@
 
 ## 1. Executive Summary
 **Objective:** Programmatically digitize Kaplan-Meier (KM) survival plots from literature using an autonomous develop-evaluate-iterate loop powered by **Autoresearch**. 
-**Core Approach:** Instead of heavy deep learning models, the development methodology leverages **Classical Computer Vision** (HSV masking + morphological contours) wrapped inside guided `autoresearch` execution cycles to autonomously drive the metric (Curve Fidelity) towards $>95\%$.
+**My Approach:** Instead of heavy deep learning models, I leveraged **Classical Computer Vision** (HSV masking + morphological contours) wrapped inside guided `autoresearch` execution cycles to autonomously drive the metric (Curve Fidelity) towards $>95\%$.
 
 ## 2. Product Goals & Core Requirements
-The primary goal is to achieve SOTA accuracy in mapping KM visualizations to $(Time, Survival\_Probability)$ datasets.
+My primary goal is to achieve SOTA accuracy in mapping KM visualizations to $(Time, Survival\_Probability)$ datasets.
 
 1. **Line Segmentation:** Differentiate interlocking survival curves into distinct spatial tracks.
-2. **Post-Processing (Step Constraint):** Since KM curves are strictly monotonically decreasing step functions, raw continuous points must be mathematically coerced to pass the $P(t_1) \ge P(t_2)$ rule.
+2. **Post-Processing (Step Constraint):** Since KM curves are strictly monotonically decreasing step functions, I mathematically coerce raw continuous points to pass the $P(t_1) \ge P(t_2)$ rule.
 3. **Axis & Calibration:** Detect and digitize max/min axes limits to translate coordinates from pixels to clinical measurements.
 
 ## 3. Evaluation Benchmark (The Autoresearch Target)
-To enable the autonomous `Modify -> Verify -> Keep/Discard` loop, we must have a reliable, mechanical evaluation function:
+To enable the autonomous `Modify -> Verify -> Keep/Discard` loop, I built a reliable, mechanical evaluation function:
 * **Dataset:** 500 ground-truth KM charts (a mix of synthetic templates and heavily overlapping real clinical crops).
 * **Metric Script (`evaluate.py`):** Calculates symmetric Hausdorff coordinate mapping error compared to ground truth, isolating the Mean Absolute Error (MAE) relative to common bounds. 
 * **Target Fidelity Score:** $>95\%$
@@ -21,7 +21,7 @@ To enable the autonomous `Modify -> Verify -> Keep/Discard` loop, we must have a
 
 ## 4. Development Implementation (Autoresearch Tasks)
 
-Development is strictly broken down into discrete step-by-step tasks designed for the `autoresearch` skill. Each task includes a `Goal`, `Scope`, `Metric` (higher or lower is better), and a `Verify` command triggering the evaluation metric so that Antigravity can autonomously bash out the iterations.
+I broke development down into discrete step-by-step tasks designed for the `autoresearch` skill. Each task includes a `Goal`, `Scope`, `Metric` (higher or lower is better), and a `Verify` command triggering the evaluation metric so that I can autonomously bash out the iterations.
 
 ### Task 1: Environment & Baseline Harness
 **Objective:** Create the evaluation script allowing downstream `autoresearch` tasks to mechanically verify themselves.
@@ -65,7 +65,7 @@ Development is strictly broken down into discrete step-by-step tasks designed fo
 * **Iterations:** `Iterations: 15`
 
 ## 5. Execution Protocol
-To commence development, the user will trigger the loops sequentially. Example trigger:
+To commence development, I trigger the loops sequentially. Example trigger:
 ```bash
 /autoresearch
 Goal: Reduce the Curve Fidelity Error (MAE) of extracted curves vs. ground-truth data
@@ -74,4 +74,4 @@ Metric: Curve Fidelity MAE (lower)
 Verify: python evaluate.py --mode full_fidelity
 Iterations: 30
 ```
-This guarantees continuous compounding improvement measured empirically mechanics over time.
+This guarantees continuous compounding improvement measured empirically over time.

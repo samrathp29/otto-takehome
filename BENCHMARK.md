@@ -42,32 +42,33 @@ The normalization factor (120) represents the maximum acceptable Hausdorff dista
 
 The referenced preprint ([biorxiv.org/content/10.1101/2025.09.15.676421v1](https://www.biorxiv.org/content/10.1101/2025.09.15.676421v1.full.pdf+html)) uses a combination of image processing and LLMs.
 
-| Aspect | Preprint Approach | Our Approach |
-|--------|------------------|--------------|
+| Aspect | Preprint Approach | My Approach |
+|--------|------------------|-------------|
 | Line detection | LLM-guided | HSV color masking + contour detection |
 | Axis reading | LLM text extraction | Pytesseract OCR + linear extrapolation |
 | Post-processing | Manual rules | Automated monotonicity enforcement |
 | Hardware | GPU required (LLM inference) | CPU only |
-| Accuracy | ~95% (reported) | 95.32% (standard), 64.28% (adversarial) |
+| Accuracy | ~95% (reported) | 95.32% |
 
 ### Honest Limitations
-Our classical CV approach struggles with:
+
+My classical CV approach struggles with:
 - **Grayscale plots** where curves have similar intensity (no hue separation)
 - **Very low resolution** where tick labels become unreadable by OCR
-- **Truncated axes** where y-axis doesn't start at 0 (our pipeline assumes 0–1)
+- **Truncated axes** where y-axis doesn't start at 0 (my pipeline assumes 0–1)
 - **Real-world plots** with anti-aliasing, compression artifacts, and non-standard styling
 
-These limitations are quantified by the adversarial benchmark (64.28% fidelity).
+I created an adversarial benchmark (64.28% fidelity) to quantify these limitations.
 
 ## Classical CV vs. Deep Learning (LineFormer)
 
-| Factor | Classical CV (Ours) | LineFormer (DL) |
-|--------|-------------------|-----------------|
+| Factor | Classical CV (Mine) | LineFormer (DL) |
+|--------|-------------------|----------------|
 | Setup complexity | `pip install` + tesseract | CUDA + PyTorch 1.13 + mmcv + weights download |
 | Inference speed | ~50ms/image (CPU) | ~200ms/image (GPU) |
-| Accuracy (clean plots) | 95.81% | ~95% (comparable) |
+| Accuracy (clean plots) | 95.32% | ~95% (comparable) |
 | Accuracy (adversarial) | 64.28% | Likely higher (learned features) |
 | Interpretability | Fully transparent | Black box |
 | Generalization | Limited to colored plots | Better on diverse styles |
 
-**Verdict:** For clean, colorful KM plots (the majority of published figures), classical CV is competitive. For robustness to diverse real-world styles, a DL approach like LineFormer would be superior — but at significant infrastructure cost.
+**My assessment:** For clean, colorful KM plots (the majority of published figures), classical CV is competitive. For robustness to diverse real-world styles, a DL approach like LineFormer would be superior — but at significant infrastructure cost.
